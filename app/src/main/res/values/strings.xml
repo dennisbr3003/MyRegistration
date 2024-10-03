@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">MyRegistration</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_form_fragment">Hello form fragment</string>
+    <string name="hello_result_fragment">Hello result fragment</string>
+    <string name="send">Send</string>
+</resources>
