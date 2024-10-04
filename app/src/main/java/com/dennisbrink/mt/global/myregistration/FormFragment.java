@@ -1,6 +1,7 @@
 package com.dennisbrink.mt.global.myregistration;
 
 import android.content.Intent;
+import android.content.res.AssetManager;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -20,6 +21,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -36,6 +38,7 @@ public class FormFragment extends Fragment {
     CheckBox cbUpsertOnline;
     TextView tvOnlineState;
     Configuration config;
+    String apikey;
     public FormFragment() {
         // Required empty public constructor
     }
@@ -53,7 +56,7 @@ public class FormFragment extends Fragment {
 
         Intent i = getActivity().getIntent();
         config = (Configuration) i.getSerializableExtra("CONFIG");
-
+        apikey = i.getStringExtra("APIKEY");
 
         btnRegisterNow = v.findViewById(R.id.btnRegisterNow);
         cbUpsertOnline = v.findViewById(R.id.cbUpsertOnline);
@@ -64,6 +67,7 @@ public class FormFragment extends Fragment {
         etLanguage = v.findViewById(R.id.etLanguage);
 
         Log.d("DB1", "fragment" + config.toString());
+        Log.d("DB1", "APIKEY " + apikey);
 
         etDisplayName.setText(config.getPlayer().getDisplayName());
         etCallSign.setText(config.getPlayer().getCallSign());
@@ -130,8 +134,9 @@ public class FormFragment extends Fragment {
 
         Log.d("DB1", "pojo to json" + body);
 
+
         Request request = new Request.Builder()
-                .header("token", "ZWZlZDgxODU0NmE1ZmZhZmQ1ZTYyMDZmMzlkMjVkN2Y2OTg1NWE5N2NkZDY0NTkwYmY4ZTRlNmQ5YWQyMmMwNw")
+                .header("token", apikey)
                 .post(body)
                 .url("http://192.168.178.39:3200/player")
                 .build();

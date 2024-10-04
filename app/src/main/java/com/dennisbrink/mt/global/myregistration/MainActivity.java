@@ -33,12 +33,12 @@ public class MainActivity extends AppCompatActivity {
             startRegsitration(config);
         });
 
-        if(config.isRegistered()){
-            Log.d("DB1", "toon GEEN button om te registreren");
-            btnGoToRegistration.setVisibility(View.INVISIBLE);
-        } else {
-            Log.d("DB1", "toon MT logo");
-        }
+//        if(config.isRegistered()){
+//            Log.d("DB1", "toon GEEN button om te registreren");
+//            btnGoToRegistration.setVisibility(View.INVISIBLE);
+//        } else {
+//            Log.d("DB1", "toon MT logo");
+//        }
 
         Log.d("DB1", config.toString());
     }
