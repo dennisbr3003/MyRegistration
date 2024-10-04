@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void startRegsitration(Configuration config) {
         Intent i = new Intent(MainActivity.this, RegisterActivity.class); // from --> to
-        i.putExtra("CONFIG", config); // send this parameter
+        i.putExtra("CONFIG", FileHelper.readData(MainActivity.this)); // send this parameter
         startActivity(i); // run it
         // finish(); // close this activity
     }
