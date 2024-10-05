@@ -1,7 +1,6 @@
 package com.dennisbrink.mt.global.myregistration;
 
 import android.content.Intent;
-import android.content.res.AssetManager;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -21,7 +20,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -32,13 +30,13 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class FormFragment extends Fragment {
-    public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+    // public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+    WebClient webClient;
     Button btnRegisterNow;
     EditText etDisplayName, etCallSign, etEmailAddress, etLanguage;
     CheckBox cbUpsertOnline;
     TextView tvOnlineState;
-    Configuration config;
-    String apikey;
+    GameProfile gameProfile;
     public FormFragment() {
         // Required empty public constructor
     }
@@ -55,8 +53,10 @@ public class FormFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_form, container, false);
 
         Intent i = getActivity().getIntent();
-        config = (Configuration) i.getSerializableExtra("CONFIG");
-        apikey = i.getStringExtra("APIKEY");
+        gameProfile = (GameProfile) i.getSerializableExtra("CONFIG");
+
+        webClient = new WebClient(getActivity());
+        webClient.initWebClient();
 
         btnRegisterNow = v.findViewById(R.id.btnRegisterNow);
         cbUpsertOnline = v.findViewById(R.id.cbUpsertOnline);
@@ -66,16 +66,13 @@ public class FormFragment extends Fragment {
         etEmailAddress = v.findViewById(R.id.etEmailAddress);
         etLanguage = v.findViewById(R.id.etLanguage);
 
-        Log.d("DB1", "fragment" + config.toString());
-        Log.d("DB1", "APIKEY " + apikey);
+        etDisplayName.setText(gameProfile.getPlayer().getDisplayName());
+        etCallSign.setText(gameProfile.getPlayer().getCallSign());
+        etEmailAddress.setText(gameProfile.getPlayer().getEmail());
+        etLanguage.setText(gameProfile.getPlayer().getLanguage());
 
-        etDisplayName.setText(config.getPlayer().getDisplayName());
-        etCallSign.setText(config.getPlayer().getCallSign());
-        etEmailAddress.setText(config.getPlayer().getEmail());
-        etLanguage.setText(config.getPlayer().getLanguage());
-
-        cbUpsertOnline.setChecked(config.isDoUpsertOnline());
-        if(config.isRegistered())tvOnlineState.setText("Curently you are registered online and you compete in the global competition");
+        cbUpsertOnline.setChecked(gameProfile.isDoUpsertOnline());
+        if(gameProfile.isRegistered())tvOnlineState.setText("Curently you are registered online and you compete in the global competition");
         else tvOnlineState.setText("Curently you are NOT registered online and you DO NOT compete in the global competition");
 
         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
@@ -88,15 +85,6 @@ public class FormFragment extends Fragment {
                 // hier moet okhttp angezwengeld worden
                 saveRegistration();
 
-                try {
-                    fragmentManager.beginTransaction()
-                            .replace(R.id.frameLayout, ResultFragment.class, null)
-                            //.addToBackStack(null) // Name can be null, but the fragment would still be on the stack (yet nameless)
-                            .commit();
-                }catch (Exception e) {
-                    Log.d("DB1", e.getMessage());
-                }
-
             }
         });
 
@@ -106,56 +94,29 @@ public class FormFragment extends Fragment {
 
     private void saveRegistration() {
 
-        config.setDoUpsertOnline(cbUpsertOnline.isChecked()); // save the checkbox vaue
+        gameProfile.setDoUpsertOnline(cbUpsertOnline.isChecked()); // save the checkbox value
 
-        config.setConfigValues(
+        gameProfile.setConfigValues(
                 etCallSign.getText().toString(),
                 etDisplayName.getText().toString(),
                 etEmailAddress.getText().toString(),
                 etLanguage.getText().toString()
         );
 
+        // save values to file;
+        // activity extends context so this is a context that can be passed like this
+        FileHelper.writeData(gameProfile, getActivity());
+
         if(!cbUpsertOnline.isChecked()){
-            FileHelper.writeData(config, getActivity()); // activity extends context so this is a context
             return;
         }
 
-        // dit moet helemaal ergens anders naar toe zodat ik het onder cbUpsertOnline kan hangen
-        OkHttpClient client = new OkHttpClient();
-        String sBody;
-        ObjectMapper objectMapper = new ObjectMapper();
         try {
-            sBody = objectMapper.writeValueAsString(config.getPlayer());
+            webClient.savePlayer(gameProfile.getPlayer());
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            Log.d("DB1", "FormFragment.saveRegistration().JsonProcessingException " + e.getMessage());
         }
 
-        RequestBody body = RequestBody.create(sBody, JSON);
-
-        Log.d("DB1", "pojo to json" + body);
-
-
-        Request request = new Request.Builder()
-                .header("token", apikey)
-                .post(body)
-                .url("http://192.168.178.39:3200/player")
-                .build();
-
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                Log.d("DB1", "call is a failure" + e.getMessage());
-                // param naar next fragment met tur, switch should also be here + spinner
-            }
-
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                Log.d("DB1", "call may be a success" + response.body());
-                config.setRegistered(true);
-                FileHelper.writeData(config, getActivity());
-                // param naar next fragment met false, switch should also be here + spinner
-            }
-        });
 
     }
 }

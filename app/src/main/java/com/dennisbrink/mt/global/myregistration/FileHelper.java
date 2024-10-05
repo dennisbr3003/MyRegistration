@@ -13,9 +13,9 @@ import java.io.ObjectOutputStream;
 
 public class FileHelper {
 
-    public static final String FILENAME = "config.dat";
+    public static final String FILENAME = "gameProfile.dat";
 
-    public static void writeData(Configuration config, Context context){
+    public static void writeData(GameProfile config, Context context){
         try {
             FileOutputStream fos = context.openFileOutput(FILENAME, context.MODE_PRIVATE);
             ObjectOutputStream oas = new ObjectOutputStream(fos);
@@ -32,12 +32,12 @@ public class FileHelper {
         boolean result = file.delete();
     }
 
-    public static Configuration readData (Context context){
-        Configuration config = null;
+    public static GameProfile readData (Context context){
+        GameProfile config = null;
         try {
             FileInputStream fis = context.openFileInput(FILENAME);
             ObjectInputStream ois = new ObjectInputStream(fis);
-            config = (Configuration) ois.readObject();
+            config = (GameProfile) ois.readObject();
         } catch (FileNotFoundException e) {
             // let's not return null here. The first time the app is run there will be no data file and no entries. This will cause
             // this exception and the return of a null object (X). We create a new object, save it and return it
@@ -48,8 +48,8 @@ public class FileHelper {
         return config;
     }
 
-    private static Configuration createInitialFile(Context context) {
-        Configuration config = new Configuration(context);
+    private static GameProfile createInitialFile(Context context) {
+        GameProfile config = new GameProfile(context);
         writeData(config, context);
         return config;
     }

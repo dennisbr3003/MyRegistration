@@ -4,79 +4,77 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 
 import android.content.Intent;
-import android.content.res.AssetManager;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Serializable;
-
-public class RegisterActivity extends AppCompatActivity {
+public class RegisterActivity extends AppCompatActivity implements IRegisterActivityListener, IRegistrationConstants {
     String deviceId;
-    Configuration config;
-
+    GameProfile config;
+    Receiver receiver = null;
+    FragmentManager fragmentManager = getSupportFragmentManager();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        // getting data from the intent
-        Intent i = getIntent();
-        //deviceId = i.getStringExtra("DEVICE_ID");  // get parameter value
-
-        config = (Configuration) i.getSerializableExtra("CONFIG");
-        Log.d("DB1", "GameActivity.class: (onCreate) config " + config.toString());
-
-//        Bundle bundle = new Bundle();
-//        bundle.putString("username", username);
-
-        String line;
-        InputStream in = null;
-
-        try {
-            AssetManager am = getAssets();
-            in = am.open("datasource.config.json");
-        } catch (IOException e) {
-            Log.d("DB1", "AppConfig.loadWindSpeeds(): error (IOException) : " + e.getLocalizedMessage());
-        } catch(Exception ee){
-            Log.d("DB1", "AppConfig.loadWindSpeeds(): error (Exception) : " + ee.getLocalizedMessage());
-        }
-
-        StringBuilder str = new StringBuilder();
-
-        try(BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
-            while((line = br.readLine()) != null){
-                str.append(line.replaceAll("\\s", ""));
-            }
-        } catch(Exception e) {
-            Log.d("DB1", "AppConfig.getApiKey(): error (Exception) : " + e.getLocalizedMessage() + e.getMessage());
-        }
-
-        Log.d("DB1", "AppConfig.getApiKey(): string : " + str);
-        ApiInfo apiInfo;
-
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            apiInfo = mapper.readValue(str.toString(), ApiInfo.class);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-
-        Log.d("DB1", "AppConfig.getApiKey(): string : " + apiInfo.getKey());
-
-        i.putExtra("APIKEY", apiInfo.getKey());
-
-        FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
                 .add(R.id.fragmentContainerView, FormFragment.class, null)
-                //.addToBackStack(null) // Name can be null
+                .commit();
+    }
+
+    private IntentFilter getFilter(){
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(ONLINE_REGISTRATION_SUCCESS); // only register this activity for these events for the receiver tio handle
+        intentFilter.addAction(ONLINE_REGISTRATION_FAILURE);
+        return intentFilter;
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (receiver != null){
+            Log.d("DB1", "RegisterActivity.onPause(): Unregistering receiver");
+            this.unregisterReceiver(receiver);
+            receiver = null;
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (receiver == null) {
+            Log.d("DB1", "RegisterActivity.onResume(): Registering receiver");
+            receiver = new Receiver();
+            receiver.setRegisterActivityListener(this);
+        }
+        this.registerReceiver(receiver, getFilter(), RECEIVER_EXPORTED);
+    }
+
+    @Override
+    public void onlineRegistrationSuccess() {
+        Log.d("DB1", "Registration success, stop spinner, switch fragment to result + success");
+
+        Intent i = getIntent();
+        i.putExtra("ONLINE_REGISTRATION", true);
+
+        fragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainerView, ResultFragment.class, null)
+                .commit();
+    }
+
+    @Override
+    public void onlineRegistrationFailure(String msg) {
+        Log.d("DB1", "Registration failure, stop spinner, switch fragment to result + failure + error");
+
+        // getting data from the intent so it will be available for the activity
+        Intent i = getIntent();
+        i.putExtra("ONLINE_REGISTRATION", false);
+        i.putExtra("MSG", msg);
+
+        fragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainerView, ResultFragment.class, null)
                 .commit();
     }
 }

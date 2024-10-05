@@ -5,12 +5,12 @@ import android.provider.Settings;
 
 import java.io.Serializable;
 
-public class Configuration implements Serializable {
+public class GameProfile implements Serializable {
     Player player;
     private String deviceId, callSign, displayName, email, language;
     private boolean isRegistered, doUpsertOnline;
 
-    public Configuration(Context context) {
+    public GameProfile(Context context) {
         this.isRegistered = false;
         this.doUpsertOnline = true;
         this.deviceId = setDeviceId(context);
@@ -54,7 +54,7 @@ public class Configuration implements Serializable {
 
     @Override
     public String toString() {
-        return "Configuration{" +
+        return "GameProfile{" +
                 "player=" + player +
                 ", deviceId='" + deviceId + '\'' +
                 ", callSign='" + callSign + '\'' +

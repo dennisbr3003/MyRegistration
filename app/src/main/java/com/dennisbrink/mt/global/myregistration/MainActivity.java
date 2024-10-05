@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 
 /*
@@ -18,32 +17,23 @@ import android.widget.Button;
      which this activity will subscribe
 */
 public class MainActivity extends AppCompatActivity {
-    Configuration config;
+    GameProfile gameProfile;
     Button btnGoToRegistration;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        config = FileHelper.readData(MainActivity.this);
+        gameProfile = FileHelper.readData(MainActivity.this);
 
         btnGoToRegistration = findViewById(R.id.btnGoToRegistration);
         btnGoToRegistration.setOnClickListener(view -> {
-            Log.d("DB1", "clicked the register button");
-            startRegsitration(config);
+            startRegistration(gameProfile);
         });
 
-//        if(config.isRegistered()){
-//            Log.d("DB1", "toon GEEN button om te registreren");
-//            btnGoToRegistration.setVisibility(View.INVISIBLE);
-//        } else {
-//            Log.d("DB1", "toon MT logo");
-//        }
-
-        Log.d("DB1", config.toString());
     }
 
-    private void startRegsitration(Configuration config) {
+    private void startRegistration(GameProfile config) {
         Intent i = new Intent(MainActivity.this, RegisterActivity.class); // from --> to
         i.putExtra("CONFIG", FileHelper.readData(MainActivity.this)); // send this parameter
         startActivity(i); // run it

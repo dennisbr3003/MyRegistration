@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
         "url"
 })
 
-public class ApiInfo {
+public class ApiConfiguration {
 
     @JsonProperty("key")
     private static String key;
@@ -25,7 +25,7 @@ public class ApiInfo {
     private Map<String, Object> additionalProperties = new LinkedHashMap<String, Object>();
 
     @JsonProperty("key")
-    public static String getKey() {
+    public String getKey() {
         return key;
     }
 
