@@ -13,7 +13,7 @@ import java.io.ObjectOutputStream;
 
 public class FileHelper {
 
-    public static final String FILENAME = "gameProfile.dat";
+    public static final String FILENAME = "gameProfile1.dat";
 
     public static void writeData(GameProfile config, Context context){
         try {

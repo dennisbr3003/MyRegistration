@@ -28,6 +28,18 @@ public class Receiver extends BroadcastReceiver implements IRegistrationConstant
             }
         }
 
+        if(intent.getAction().equals(LOCAL_REGISTRATION_FAILURE)) {
+            if (registerActivityListener != null) {
+                registerActivityListener.localRegistrationFailure(intent.getStringExtra("MSG"));
+            }
+        }
+
+        if(intent.getAction().equals(LOCAL_REGISTRATION_SUCCESS)) {
+            if (registerActivityListener != null) {
+                registerActivityListener.localRegistrationSuccess();
+            }
+        }
+
     }
 
 }

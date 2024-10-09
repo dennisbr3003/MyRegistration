@@ -1,7 +1,10 @@
 package com.dennisbrink.mt.global.myregistration;
 
 import android.content.Context;
-import android.provider.Settings;
+import android.provider.Settings.Secure;
+import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import java.io.Serializable;
 
@@ -13,7 +16,7 @@ public class GameProfile implements Serializable {
     public GameProfile(Context context) {
         this.isRegistered = false;
         this.doUpsertOnline = true;
-        this.deviceId = setDeviceId(context);
+        this.deviceId = Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);;
     }
 
     public boolean isDoUpsertOnline() {
@@ -36,22 +39,26 @@ public class GameProfile implements Serializable {
         return deviceId;
     }
 
-    public void setConfigValues(String callSign, String displayName, String email, String language){
+    public void setConfigValues(String callSign, String displayName, String email, boolean goOnline){
         this.callSign = callSign;
         this.displayName = displayName;
         this.email = email;
-        this.language = language;
+        this.doUpsertOnline = goOnline;
     }
 
-    private String setDeviceId(Context context) {
-        String tDeviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
-        return tDeviceId;
+    private void setDeviceId(String diviceId) {
+        this.deviceId =  deviceId;
     }
 
     public Player getPlayer() {
         return new Player(this.deviceId, this.callSign, this.displayName, this.email, this.language);
     }
 
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
+    @NonNull
     @Override
     public String toString() {
         return "GameProfile{" +
