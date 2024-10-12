@@ -8,6 +8,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.BufferedReader;
@@ -26,8 +27,8 @@ import okhttp3.Response;
 public class WebClient implements IRegistrationConstants {
 
     private boolean isOperational;
-    private String apiKey, apiUrl;
-    private Context context;
+    private String apiKey, apiUrl, apiApp;
+    private final Context context;
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
     public WebClient(Context context) {
@@ -65,6 +66,7 @@ public class WebClient implements IRegistrationConstants {
         apiConfiguration = mapper.readValue(str.toString(), ApiConfiguration.class);
 
         this.apiKey = apiConfiguration.getKey();
+        this.apiApp = apiConfiguration.getApp();
         this.apiUrl = apiConfiguration.getUrl();
     }
 
@@ -78,11 +80,24 @@ public class WebClient implements IRegistrationConstants {
 
         RequestBody body = RequestBody.create(sBody, JSON);
 
-        Request request = new Request.Builder()
-                .header("token", this.apiKey)
-                .post(body)
-                .url(this.apiUrl)
-                .build();
+        try {
+            Log.d("DB1", "token " +  Hmac.generateHmacSha256(this.apiKey, this.apiApp + "." + player.getDeviceId(), true));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        Request request = null;
+        try {
+            request = new Request.Builder()
+                    .header("token", Hmac.generateHmacSha256(this.apiKey, this.apiApp + "." + player.getDeviceId(), true))
+                    .header("device", player.getDeviceId())
+                    .post(body)
+                    .url(this.apiUrl)
+                    .build();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
         okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
@@ -92,14 +107,24 @@ public class WebClient implements IRegistrationConstants {
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                Log.d("DB1", "call may be a success " + response.body());
-                sendRegistrationSuccess();
+                if(response.isSuccessful()) {
+                    sendRegistrationSuccess();
+                } else {
+                    // retrieve custom message sent from the API if any. If there is a custom message
+                    // it must have the structure like this { type: <http code>, message: <message> }
+                    if(response.body()!=null) {
+                        ObjectMapper mapper = new ObjectMapper();
+                        JsonNode jsonNode = mapper.readTree(response.body().string());
+                        sendRegistrationFailure(jsonNode.get("type").asText() + " " + jsonNode.get("message").asText());
+                    } else {
+                        sendRegistrationFailure(response.code() + " " + response.message());
+                    }
+                }
             }
         });
     }
 
     private void sendRegistrationFailure(String msg) {
-        Log.d("DB1", "trying to send registration failure");
         Intent i = new Intent();
         i.setAction(ONLINE_REGISTRATION_FAILURE);
         i.putExtra("MSG", msg);
@@ -107,12 +132,12 @@ public class WebClient implements IRegistrationConstants {
     }
 
     private void sendRegistrationSuccess() {
-        Log.d("DB1", "trying to send registration success");
         Intent i = new Intent();
         i.setAction(ONLINE_REGISTRATION_SUCCESS);
         this.context.sendBroadcast(i);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "WebClient{" +

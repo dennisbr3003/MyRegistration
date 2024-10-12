@@ -1,28 +1,23 @@
 package com.dennisbrink.mt.global.myregistration;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
+        "app",
         "key",
         "url"
 })
 
 public class ApiConfiguration {
-
+    @JsonProperty("app")
+    private static String app;
     @JsonProperty("key")
     private static String key;
     @JsonProperty("url")
     private String url;
-    @JsonIgnore
-    private Map<String, Object> additionalProperties = new LinkedHashMap<String, Object>();
 
     @JsonProperty("key")
     public String getKey() {
@@ -34,6 +29,14 @@ public class ApiConfiguration {
         this.key = key;
     }
 
+    @JsonProperty("app")
+    public String getApp() {
+        return app;
+    }
+
+    @JsonProperty("app")
+    public void setApp(String app) { this.app = app; }
+
     @JsonProperty("url")
     public String getUrl() {
         return url;
@@ -42,16 +45,6 @@ public class ApiConfiguration {
     @JsonProperty("url")
     public void setUrl(String url) {
         this.url = url;
-    }
-
-    @JsonAnyGetter
-    public Map<String, Object> getAdditionalProperties() {
-        return this.additionalProperties;
-    }
-
-    @JsonAnySetter
-    public void setAdditionalProperty(String name, Object value) {
-        this.additionalProperties.put(name, value);
     }
 
 }

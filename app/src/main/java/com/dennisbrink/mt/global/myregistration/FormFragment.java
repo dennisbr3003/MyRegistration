@@ -3,6 +3,8 @@ package com.dennisbrink.mt.global.myregistration;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.appcompat.content.res.AppCompatResources;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
@@ -13,6 +15,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -58,6 +61,9 @@ public class FormFragment extends Fragment implements AdapterView.OnItemSelected
         etDisplayName = v.findViewById(R.id.etDisplayName);
         etCallSign = v.findViewById(R.id.etCallSign);
         etEmailAddress = v.findViewById(R.id.etEmailAddress);
+
+//        FrameLayout fl = v.findViewById(R.id.frameLayoutProfile);
+//        fl.setBackground(AppCompatResources.getDrawable(requireActivity(), R.drawable.math15));
 
         Spinner spin = v.findViewById(R.id.spinLanguage);
         spin.setOnItemSelectedListener(this);
