@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public class ResultFragment extends Fragment {
@@ -15,11 +16,12 @@ public class ResultFragment extends Fragment {
     boolean onlineRegistration;
 
     TextView tvResult, tvMsg;
+    ImageView ivRegisterResult;
 
     public ResultFragment() {
         // Required empty public constructor
     }
-
+// TODO countdowntimer (ContDownTimer) see Ferdi The Fly sow we can auto "go back" use circular progress bar
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,14 +35,17 @@ public class ResultFragment extends Fragment {
 
         tvResult = v.findViewById(R.id.tvResult);
         tvMsg = v.findViewById(R.id.tvMsg);
+        ivRegisterResult = v.findViewById(R.id.ivRegisterResult);
 
         Intent i = getActivity().getIntent();
         onlineRegistration = i.getBooleanExtra("ONLINE_REGISTRATION", false);
 
         if(onlineRegistration) {
             tvResult.setText("Registration successful");
+            ivRegisterResult.setImageResource(R.drawable.checkok);
         } else {
             tvResult.setText("Registration failure");
+            ivRegisterResult.setImageResource(R.drawable.error);
             tvMsg.setVisibility(View.VISIBLE);
             tvMsg.setText(i.getStringExtra("MSG"));
         }

@@ -3,10 +3,10 @@ package com.dennisbrink.mt.global.myregistration;
 import android.content.Intent;
 import android.os.Bundle;
 
-import androidx.appcompat.content.res.AppCompatResources;
-import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,7 +15,6 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -33,7 +32,8 @@ public class FormFragment extends Fragment implements AdapterView.OnItemSelected
     Spinner spin;
     GameProfile gameProfile;
     ArrayList<LanguageSpinnerItem> languageSpinnerItemArrayList;
-
+    private Runnable runnable;
+    private Handler handler;
     public FormFragment() {
         // Required empty public constructor
     }
@@ -61,9 +61,6 @@ public class FormFragment extends Fragment implements AdapterView.OnItemSelected
         etDisplayName = v.findViewById(R.id.etDisplayName);
         etCallSign = v.findViewById(R.id.etCallSign);
         etEmailAddress = v.findViewById(R.id.etEmailAddress);
-
-//        FrameLayout fl = v.findViewById(R.id.frameLayoutProfile);
-//        fl.setBackground(AppCompatResources.getDrawable(requireActivity(), R.drawable.math15));
 
         Spinner spin = v.findViewById(R.id.spinLanguage);
         spin.setOnItemSelectedListener(this);
@@ -121,11 +118,29 @@ public class FormFragment extends Fragment implements AdapterView.OnItemSelected
             return;
         }
 
-        try {
-            webClient.savePlayer(gameProfile.getPlayer());
-        } catch (JsonProcessingException e) {
-            sendRegistrationFailure( e.getMessage());
-        }
+        // show progress bar fragment, this could take some time
+        FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+        fragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainerView, ProgressFragment.class, null)
+                .commit();
+
+        // We need to show the progress fragment everytime we save something with teh API.
+        // If the API is not online a time out will occur after 10 seconds. To avoid the user
+        // thinking the app is crashing we show a progress bar running. A successful result (API
+        // is online and the save is successful) is THAT fast that showing the progress fragment
+        // without a delay looks like a flickering. Hence we delay execution of the actual save
+        // with 1 second with a runnable and a handler
+        handler = new Handler();
+        runnable = () -> {
+            try {
+                webClient.savePlayer(gameProfile.getPlayer());
+            } catch (JsonProcessingException e) {
+                sendRegistrationFailure( e.getMessage());
+            }
+        };
+        handler.postDelayed(runnable, 1000);
+
+
 
     }
 
@@ -144,7 +159,6 @@ public class FormFragment extends Fragment implements AdapterView.OnItemSelected
 
     @Override
     public void onNothingSelected(AdapterView<?> adapterView) {
-
     }
 
     private void sendRegistrationSuccess() {

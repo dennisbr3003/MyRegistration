@@ -2,10 +2,9 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/frameLayout2"
+    android:id="@+id/frameLayoutResult"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFC107"
     android:visibility="visible"
     tools:context=".ResultFragment">
 
@@ -15,8 +14,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
+        android:background="#90FFFFFF"
+        android:padding="18dp"
         android:text="dummy text"
         android:textSize="24sp"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -26,11 +28,24 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
-        android:layout_marginTop="32dp"
         android:layout_marginEnd="24dp"
+        android:background="#90FFFFFF"
+        android:padding="18dp"
         android:text="Some message"
         android:textAlignment="center"
         android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/ivRegisterResult" />
+
+    <ImageView
+        android:id="@+id/ivRegisterResult"
+        android:layout_width="95dp"
+        android:layout_height="95dp"
+        android:background="#90FFFFFF"
+        android:padding="18dp"
+        android:src="@drawable/error"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvResult" />
