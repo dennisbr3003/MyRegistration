@@ -151,8 +151,6 @@ public class RegisterActivity extends AppCompatActivity implements IRegisterActi
         // the get the custom layout to use full width
         this.getSupportActionBar().setCustomView(v, new Toolbar.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
-
-
     }
 
 }
